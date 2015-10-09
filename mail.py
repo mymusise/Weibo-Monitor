@@ -1,7 +1,7 @@
 import smtplib
 from email.mime.text import MIMEText
 from random import Random
-from config import mailConfig
+from config import *
 #################
 #example
 # mail_host = 'smtp.163.com'

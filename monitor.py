@@ -4,40 +4,46 @@ import sys
 from mail import *
 from config import *
 
+def delay(time):
+	for i in range(time):
+		for j in range(1000):
+			for k in range(500):
+				a=100*100
+
 def init_(broswer,uid):
-	broswer.get("http://weibo.com/login.php")
-	broswer.get("http://weibo.com/u/"+uid+"?source=webim")
-	weibos = broswer.find_elements_by_xpath("//div[@class='WB_feed WB_feed_profile']/div[@class='WB_cardwrap WB_feed_type S_bg2 ']")
+	broswer.get("http:/m.weibo.cn/u/"+uid)
+	weibos = broswer.find_elements_by_xpath("//div[@class='card-list']/div[@class='card card9 line-around']")
 	while len(weibos)==0:
-		weibos = broswer.find_elements_by_xpath("//div[@class='WB_feed WB_feed_profile']/div[@class='WB_cardwrap WB_feed_type S_bg2 ']")
+		weibos = broswer.find_elements_by_xpath("//div[@class='card-list']/div[@class='card card9 line-around']")
 	print len(weibos)
-	print weibos[1].get_attribute('mid')
+	print weibos[1].get_attribute('data-jump')
 
 	f=open('mid','w')
 	for w in weibos:
-		f.write(w.get_attribute('mid')+'\n')
+		f.write(w.get_attribute('data-jump')+'\n')
 
 def monitor(broswer,uid):
-	broswer.get("http://weibo.com/u/"+uid+"?source=webim")
-	weibos = broswer.find_elements_by_xpath("//div[@class='WB_feed WB_feed_profile']/div[@class='WB_cardwrap WB_feed_type S_bg2 ']")
+	broswer.get("http://m.weibo.cn/u/"+uid+"?source=webim")
+	weibos = broswer.find_elements_by_xpath("//div[@class='card-list']/div[@class='card card9 line-around']")
 	while len(weibos)==0:
-		weibos = broswer.find_elements_by_xpath("//div[@class='WB_feed WB_feed_profile']/div[@class='WB_cardwrap WB_feed_type S_bg2 ']")
+		weibos = broswer.find_elements_by_xpath("//div[@class='card-list']/div[@class='card card9 line-around']")
 	print len(weibos)
 	old_mid = open('mid','r').read().split('\n')
 	for w in weibos:
-		if w.get_attribute('mid') not in old_mid:
+		if w.get_attribute('data-jump') not in old_mid:
 			print w.text
 			mail_to(mailConfig['your_mail'],mailConfig['password'],mailConfig['mail_host'],mailConfig['mail_to'],'Weibo_Monitor',w.text.encode('utf-8'))
+			delay(monitorTime)
 			midFile=open('mid','w')
 			for w in weibos:
-				midFile.write(w.get_attribute('mid')+'\n')
+				midFile.write(w.get_attribute('data-jump')+'\n')
 			break
 
 
 def main(argv):
 	if len(argv)==2:
 		uid = argv[1]
-		broswer = webdriver.Firefox()
+		broswer = webdriver.PhantomJS()
 		init_(broswer,uid)
 		while 1:
 			monitor(broswer,uid)
