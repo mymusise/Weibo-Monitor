@@ -19,6 +19,7 @@ class Monitor():
 					a=100*100
 
 	def init_(self):
+		self.logger.info('init mid')
 		self.broswer.get(self.link)
 		weibos = self.broswer.find_elements_by_xpath(self.cardPath)
 		while len(weibos)==0:
@@ -28,19 +29,23 @@ class Monitor():
 		f=open(self.tmpFile,'w')
 		for w in weibos:
 			f.write(w.get_attribute('data-jump')+'\n')
+		self.logger.info('Completed init mid')
 
 	def monitor(self):
+		self.logger.info('getting the link')
 		self.broswer.get(self.link)
 		weibos = self.broswer.find_elements_by_xpath(self.cardPath)
 		while len(weibos)==0:
 			self.broswer.get(self.link)
 			weibos = self.broswer.find_elements_by_xpath(self.cardPath)
+		self.logger.info('found the object')
 		self.logger.info(weibos[0].get_attribute('data-jump'))
 		old_mid = open(self.tmpFile,'r').read().split('\n')
 		for w in weibos:
 			if w.get_attribute('data-jump') not in old_mid:
 				print w.text
 				mail_to(mailConfig['your_mail'],mailConfig['password'],mailConfig['mail_host'],mailConfig['mail_to'],'Weibo_Monitor',w.text.encode('utf-8'))
+				self.logger.info('sent mail')
 				self.delay(monitorTime)
 				midFile=open(self.tmpFile,'w')
 				for w in weibos:
@@ -49,8 +54,10 @@ class Monitor():
 
 	def run(self):
 		self.init_()
+		self.logger.info('start monitor')
 		while 1:
 			self.monitor()
+			self.logger.info('sleeping')
 			sleep(monitorTime)
 
 def main(argv):
